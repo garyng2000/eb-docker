@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  init:
+    image: alpine
+    environment:
+      - PORT=${PORT}
+    volumes:
+      - /mnt/data:/mnt:rw
+      - ./scripts:/tmp:rw
+    command: ["/bin/sh", "/tmp/setup.sh"]
+  webserver:
+    image: python:2.7
+    environment:
+      - PORT=8000
+    ports:
+      - 8000:8000
+    depends_on:
+      - "init"
+      - "postgres"
+    volumes:
+      - ./:/tmp:rw
+    entrypoint: ["python", "/tmp/application.py"]
+  postgres:
+    image: postgres
+    depends_on:
+      - init
+    volumes:
+      - /mnt/data/postgres:/var/lib/postgresql/data:rw
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=password
+
