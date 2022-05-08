@@ -28,6 +28,8 @@ fi
 [[ ! -e /etc/letsencrypt/accounts ]] && sed -i 's/^.*managed by Certbot.*$//' /etc/nginx/conf.d/http-https-proxy.conf
 [[ ! -e /etc/letsencrypt/accounts ]] && rm -f /etc/letsencrypt/* 
 sed -i "s/server_name .*;/server_name ${cert_domain};/" /etc/nginx/conf.d/http-https-proxy.conf
+# cater for case of super long domain name generated automatically
+sed -i "s/types_hash_max_size 4096;$/types_hash_max_size 4096;server_names_hash_bucket_size 128;/" /etc/nginx/nginx.conf
 certbot $staging --debug --non-interactive --redirect --agree-tos --nginx --email ${cert_email} --domains ${cert_domain} --keep-until-expiring
 #make the modified http-https-proxy.conf listen on 80/443(certbot make it 443 only which is not good for behind ALB
 sed -i 's/listen 443 ssl;/listen 80; listen 443 ssl;/' /etc/nginx/conf.d/http-https-proxy.conf
